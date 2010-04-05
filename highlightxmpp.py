@@ -88,6 +88,7 @@ def send_xmpp(data, signal, msg, trial=1):
             w.prnt('', "Could send to XMPP server.")
         else:
             w.prnt('', "Lost connection to XMPP server. Trying to send again... (trial %d)" % trial + 1)
+            sleep(0.5)
             send_xmpp(data, signal, msg, trial + 1)
     return w.WEECHAT_RC_OK
 
