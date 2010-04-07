@@ -62,7 +62,7 @@ def connect_xmpp():
         client.connect()
         client.auth(jid.getNode(), password)
     except:
-        w.prnt('', "Could not connect or authenticate to XMPP server.")
+        w.prnt('', "XMPP: Could not connect or authenticate to server.")
         client = None
         return False
     return True
@@ -85,9 +85,9 @@ def send_xmpp(data, signal, msg, trial=1):
         # fail. catch that here and try to reconnect. isConnected() should
         # start to realize that once this exception is triggered.
         if trial > 3:
-            w.prnt('', "Could not send to XMPP server.")
+            w.prnt('', "XMPP: Could not send to server.")
         else:
-            w.prnt('', "Sending failed. Trying again...")
+            w.prnt('', "XMPP: Sending failed. Trying again...")
             sleep(0.5)
             send_xmpp(data, signal, msg, trial + 1)
     return w.WEECHAT_RC_OK
