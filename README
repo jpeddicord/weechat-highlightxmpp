@@ -1,0 +1,24 @@
+When loaded, this plugin will send you a message over XMPP (Jabber) when a
+highlighted message or a private message is received. Great for running under
+a detatched terminal where you're not always looking at your IRC window.
+
+Changelog:
+ * 0.3:
+   - Fixed message type to 'chat'; should fix problems with offline send
+     and XML embedded in the message on some receivers
+   - Updated notes for using an XMPP resource
+   - Removed "failed to send" notification, as it's normal flow
+
+
+ You must configure this plugin before using:
+
+   JID messages are sent from:
+     /set plugins.var.python.highlightxmpp.jid someid@jabber.org
+   alternatively, to use a specific resource:
+     /set plugins.var.python.highlightxmpp.jid someid@jabber.org/resource
+
+   Password for the above JID:
+     /set plugins.var.python.highlightxmpp.password abcdef
+
+   JID messages are sent *to* (if not set, defaults to the same jid as above):
+     /set plugins.var.python.highlightxmpp.to myid@jabber.org
