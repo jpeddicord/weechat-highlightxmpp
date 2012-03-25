@@ -78,7 +78,7 @@ def connect_xmpp():
         return False
     return True
 
-def send_xmpp(data, signal, msg, trial=1):
+def send_xmpp(data, signal, msgtxt, trial=1):
     global client
 
     # ignore XMPP's deprecation warnings
@@ -95,7 +95,7 @@ def send_xmpp(data, signal, msg, trial=1):
             jid_to = w.config_get_plugin('jid')
 
         # send the message
-        msg = xmpp.protocol.Message(jid_to, msg, typ='chat')
+        msg = xmpp.protocol.Message(jid_to, msgtxt, typ='chat')
         try:
             client.send(msg)
         except IOError:
@@ -106,7 +106,7 @@ def send_xmpp(data, signal, msg, trial=1):
                 w.prnt('', "XMPP: Could not send to server.")
             else:
                 sleep(0.5)
-                send_xmpp(data, signal, msg, trial + 1)
+                send_xmpp(data, signal, msgtxt, trial + 1)
         return w.WEECHAT_RC_OK
 
 # register with weechat

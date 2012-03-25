@@ -3,6 +3,9 @@ highlighted message or a private message is received. Great for running under
 a detatched terminal where you're not always looking at your IRC window.
 
 Changelog:
+ * 0.4:
+   - Actually fixed random XML appearing in messages.
+
  * 0.3:
    - Fixed message type to 'chat'; should fix problems with offline send
      and XML embedded in the message on some receivers
