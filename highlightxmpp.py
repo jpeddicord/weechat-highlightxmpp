@@ -1,7 +1,7 @@
-# HighlightXMPP 0.3 for IRC. Requires WeeChat >= 0.3.0 and Python >= 2.6.
+# HighlightXMPP 0.4 for IRC. Requires WeeChat >= 0.3.0 and Python >= 2.6.
 # Repo: https://github.com/jpeddicord/weechat-highlightxmpp
 # 
-# Copyright (c) 2009-2011 Jacob Peddicord <jpeddicord@ubuntu.com>
+# Copyright (c) 2009-2012 Jacob Peddicord <jpeddicord@ubuntu.com>
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
