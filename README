@@ -2,9 +2,12 @@ When loaded, this plugin will send you a message over XMPP (Jabber) when a
 highlighted message or a private message is received. Great for running under
 a detatched terminal where you're not always looking at your IRC window.
 
+Requires SleekXMPP (`pip install sleekxmpp`)
+
 Changelog:
  * 0.5:
    - switch to sleekxmpp as xmpp library (http://github.com/fritzy/SleekXMPP)
+
  * 0.4:
    - Actually fixed random XML appearing in messages.
 
