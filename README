@@ -5,6 +5,11 @@ a detatched terminal where you're not always looking at your IRC window.
 Requires SleekXMPP (`pip install sleekxmpp`)
 
 Changelog:
+ * 0.6:
+   - switch from sleekxmpp to commandline utility sendxmpp 
+     (https://github.com/lhost/sendxmpp) or go-sendxmpp 
+     (https://salsa.debian.org/mdosch/go-sendxmpp).
+
  * 0.5:
    - switch to sleekxmpp as xmpp library (http://github.com/fritzy/SleekXMPP)
 
