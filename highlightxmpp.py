@@ -1,98 +1,96 @@
-# HighlightXMPP 0.5 for IRC. Requires WeeChat >= 0.3.0,
-# Python >= 2.6, and sleekxmpp.
+# HighlightXMPP 0.6 for IRC. Requires WeeChat >= 0.3.0,
+# Python >= 2.6, and sendxmpp (https://github.com/lhost/sendxmpp) or
+# equivalent.
 # Repo: https://github.com/jpeddicord/weechat-highlightxmpp
-# 
+#
 # Copyright (c) 2009-2015 Jacob Peddicord <jacob@peddicord.net>
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #######
 #
-# You must configure this plugin before using:
+# You must configure sendxmpp before using this plugin, so you'll be able to
+# send message from commandline using format:
 #
-#   JID messages are sent from:
-#     /set plugins.var.python.highlightxmpp.jid someid@jabber.org
-#   alternatively, to use a specific resource:
-#     /set plugins.var.python.highlightxmpp.jid someid@jabber.org/resource
+#   echo "message" | sendxmpp someid@jabber.org
 #
-#   Password for the above JID:
-#     /set plugins.var.python.highlightxmpp.password abcdef
+# also you will need to provide JID to send messages:
 #
-#   JID messages are sent *to* (if not set, defaults to the same jid as above):
-#     /set plugins.var.python.highlightxmpp.to myid@jabber.org
+#   /set plugins.var.python.highlightxmpp.to myid@jabber.org
+#
+# finally, you might want to change the sendxmpp binary to some other
+# implementation (like https://salsa.debian.org/mdosch/go-sendxmpp) and/or
+# provide some additional parameters, i.e.:
+#
+#   /set plugins.var.python.highlightxmpp.command "/path/to/go-sendxmpp -t"
+#
+# You can set debug option to "on" if you experience issues regarding sending
+# messages via sendxmpp:
+#
+#   /set plugins.var.python.highlightxmpp.debug off
+#
+import subprocess
 
-import sys
-import weechat as w
-import sleekxmpp
-
-if sys.version_info < (3, 0):
-    from sleekxmpp.util.misc_ops import setdefaultencoding
-    setdefaultencoding('utf8')
-
-info = (
-    'highlightxmpp',
-    'Jacob Peddicord <jacob@peddicord.net>',
-    '0.5',
-    'GPL3',
-    "Relay highlighted & private IRC messages over XMPP (Jabber)",
-    '',
-    ''
-)
-
-settings = {
-    'jid': '',
-    'password': '',
-    'to': '',
-}
-
-class SendMsgBot(sleekxmpp.ClientXMPP):
-    def __init__(self, jid, password, recipient, message):
-        sleekxmpp.ClientXMPP.__init__(self, jid, password)
-        self.jid = jid
-        self.recipient = recipient
-        self.msg = message
-        self.add_event_handler("session_start", self.start, threaded=True)
-    def start(self, event):
-        self.send_presence()
-        self.get_roster()
-        self.send_message(mto=self.recipient,
-                          mbody=self.msg,
-                          mtype='chat')
-        self.disconnect(wait=True)
+import weechat
 
 
-def send_xmpp(data, signal, message, trial=1):
-    jid = w.config_get_plugin('jid')
-    jid_to = w.config_get_plugin('to')
-    if not jid_to:
-        jid_to = jid
-    password = w.config_get_plugin('password')
-
-    xmpp = SendMsgBot(jid, password, jid_to, message)
-    if not xmpp.connect():
-        w.prnt('', "Unable to connect to XMPP server.")
-        return w.WEECHAT_RC_OK
-    xmpp.process(block=True)
-    return w.WEECHAT_RC_OK
+SETTINGS = {'command': 'sendxmpp',
+            'to': '',
+            'debug': 'off'}
+INFO = ('highlightxmpp',
+        'Jacob Peddicord <jacob@peddicord.net>',
+        '0.6',
+        'GPL3',
+        "Relay highlighted & private IRC messages over XMPP (Jabber)",
+        '',
+        '')
 
 
-# register with weechat
-if w.register(*info):
-    # add our settings
-    for setting in settings:
-        if not w.config_is_set_plugin(setting):
-            w.config_set_plugin(setting, settings[setting])
-    # and finally our hooks
-    w.hook_signal('weechat_highlight', 'send_xmpp', '')
-    w.hook_signal('weechat_pv', 'send_xmpp', '')
+def send_xmpp(data, signal, message):
+    """Send XMPP message using external commandline tool."""
+    jid = weechat.config_get_plugin('to')
+    command = weechat.config_get_plugin('command').split(' ')
+    debug = weechat.config_get_plugin('debug') == 'on'
+
+    if not jid:
+        weechat.prnt('', 'You need to provide destination JID to use this '
+                     'plugin.')
+        return weechat.WEECHAT_RC_OK
+
+    command.append(jid)
+
+    pipe = subprocess.Popen(command, stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        message = message.encode()
+    except UnicodeDecodeError:
+        pass
+
+    _, stderr = pipe.communicate(input=message)
+    if pipe.returncode != 0 and debug:
+        try:
+            stderr = stderr.decode()
+        except UnicodeDecodeError:
+            pass
+        weechat.prnt('', 'Error sending message to %s:\n%s' % (jid, stderr))
+    return weechat.WEECHAT_RC_OK
+
+
+if weechat.register(*INFO):
+    for setting in SETTINGS:
+        if not weechat.config_is_set_plugin(setting):
+            weechat.config_set_plugin(setting, SETTINGS[setting])
+
+    weechat.hook_signal('weechat_highlight', 'send_xmpp', '')
+    weechat.hook_signal('weechat_pv', 'send_xmpp', '')
